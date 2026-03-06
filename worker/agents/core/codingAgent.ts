@@ -137,7 +137,13 @@ export class CodeGeneratorAgent extends Agent<Env, AgentState> implements AgentI
 
         // Save app to database EARLY so WebSocket ownership checks succeed
         // This prevents the race condition where frontend connects before app exists in D1
-        await this.saveToDatabase({ early: true, query: initArgs.query });
+        // Note: this.state.metadata is not yet populated, so we pass metadata from initArgs directly
+        await this.saveToDatabase({
+            early: true,
+            query: initArgs.query,
+            agentId: inferenceContext.metadata.agentId,
+            userId: inferenceContext.metadata.userId
+        });
 
         // Let behavior handle all state initialization (blueprint, projectName, etc.)
         await this.behavior.initialize({
@@ -354,9 +360,11 @@ export class CodeGeneratorAgent extends Agent<Env, AgentState> implements AgentI
         return this.behavior.importTemplate(templateName);
     }
     
-    protected async saveToDatabase(options?: { early?: boolean; query?: string }) {
-        const agentId = this.state.metadata.agentId;
-        const userId = this.state.metadata.userId;
+    protected async saveToDatabase(options?: { early?: boolean; query?: string; agentId?: string; userId?: string }) {
+        // For early saves, metadata comes from options (state not yet populated)
+        // For late saves, metadata comes from state
+        const agentId = options?.agentId || this.state.metadata.agentId;
+        const userId = options?.userId || this.state.metadata.userId;
         const appService = new AppService(this.env);
 
         if (options?.early) {
