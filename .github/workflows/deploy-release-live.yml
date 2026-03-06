@@ -46,8 +46,8 @@ jobs:
     timeout-minutes: 45
     needs: test-build
 
-    # Skip deploy for forks (they won't have secrets anyway)
-    if: github.repository_owner == 'cloudflare'
+    # Deploy from this fork
+    if: github.repository_owner == 'greenisi'
 
     env:
       CI: true
