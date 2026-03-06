@@ -1054,6 +1054,24 @@ class CloudflareDeploymentManager {
 				return '';
 			}
 
+			// Skip route/zone configuration for workers.dev subdomains
+			if (customDomain.endsWith('.workers.dev')) {
+				console.log(
+					'ℹ️  CUSTOM_DOMAIN is a workers.dev subdomain - skipping route configuration',
+				);
+
+				const updatedContent = this.updateWranglerForWorkersDev(content);
+				this.writeWranglerConfig(updatedContent);
+
+				this.logSuccess('Updated wrangler.jsonc for workers.dev deployment:', [
+					'- Removed routes configuration',
+					'- Set workers_dev: true',
+					'- Set preview_urls: true',
+					`- CUSTOM_DOMAIN kept as: ${customDomain}`
+				]);
+				return customDomain;
+			}
+
 			console.log(
 				`🔧 Updating wrangler.jsonc routes with custom domain: ${customDomain}`,
 			);

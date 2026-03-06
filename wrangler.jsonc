@@ -154,7 +154,7 @@
         },
         "MAX_SANDBOX_INSTANCES": "10",
         "SANDBOX_INSTANCE_TYPE": "standard-3",
-        "CUSTOM_DOMAIN": ""
+        "CUSTOM_DOMAIN": "vibesdk-production.zae003.workers.dev"
     },
 	"workers_dev": true,
 	"preview_urls": false
