@@ -16,26 +16,26 @@ const COMMON_AGENT_CONFIGS = {
         reasoning_effort: 'medium' as const,
         max_tokens: 8000,
         temperature: 1,
-        fallbackModel: AIModels.GEMINI_2_5_FLASH,
+        fallbackModel: AIModels.CLAUDE_4_SONNET,
     },
     realtimeCodeFixer: {
-        name: AIModels.GROK_4_1_FAST_NON_REASONING,
+        name: AIModels.DISABLED,
         reasoning_effort: 'low' as const,
         max_tokens: 32000,
         temperature: 0.2,
-        fallbackModel: AIModels.GEMINI_2_5_FLASH,
+        fallbackModel: AIModels.CLAUDE_4_SONNET,
     },
     fastCodeFixer: {
         name: AIModels.DISABLED,
         reasoning_effort: undefined,
         max_tokens: 64000,
         temperature: 0.0,
-        fallbackModel: AIModels.GEMINI_2_5_PRO,
+        fallbackModel: AIModels.CLAUDE_4_SONNET,
     },
     templateSelection: {
-        name: AIModels.GEMINI_2_5_FLASH_LITE,
+        name: AIModels.CLAUDE_4_5_HAIKU,
         max_tokens: 2000,
-        fallbackModel: AIModels.GROK_4_1_FAST_NON_REASONING,
+        fallbackModel: AIModels.CLAUDE_4_SONNET,
         temperature: 1,
     },
 } as const;
@@ -44,7 +44,7 @@ const SHARED_IMPLEMENTATION_CONFIG = {
     reasoning_effort: 'low' as const,
     max_tokens: 48000,
     temperature: 1,
-    fallbackModel: AIModels.GEMINI_2_5_PRO,
+    fallbackModel: AIModels.CLAUDE_4_SONNET,
 };
 
 //======================================================================================
@@ -119,65 +119,65 @@ const PLATFORM_AGENT_CONFIG: AgentConfig = {
 //======================================================================================
 // Default Gemini-only config (most likely used in your deployment)
 //======================================================================================
-/* These are the default out-of-the box gemini-only models used when PLATFORM_MODEL_PROVIDERS is not set */
+/* Default config using Claude (Anthropic) models */
 const DEFAULT_AGENT_CONFIG: AgentConfig = {
     ...COMMON_AGENT_CONFIGS,
     templateSelection: {
-        name: AIModels.GEMINI_2_5_FLASH_LITE,
+        name: AIModels.CLAUDE_4_5_HAIKU,
         max_tokens: 2000,
-        fallbackModel: AIModels.GEMINI_2_5_FLASH,
+        fallbackModel: AIModels.CLAUDE_4_SONNET,
         temperature: 0.6,
     },
     blueprint: {
-        name: AIModels.GEMINI_3_FLASH_PREVIEW,
+        name: AIModels.CLAUDE_4_SONNET,
         reasoning_effort: 'high',
         max_tokens: 64000,
-        fallbackModel: AIModels.GEMINI_2_5_PRO,
+        fallbackModel: AIModels.CLAUDE_4_5_HAIKU,
         temperature: 1,
     },
     projectSetup: {
-        name: AIModels.GEMINI_3_FLASH_PREVIEW,
+        name: AIModels.CLAUDE_4_SONNET,
         ...SHARED_IMPLEMENTATION_CONFIG,
     },
     phaseGeneration: {
-        name: AIModels.GEMINI_3_FLASH_PREVIEW,
+        name: AIModels.CLAUDE_4_SONNET,
         ...SHARED_IMPLEMENTATION_CONFIG,
     },
     firstPhaseImplementation: {
-        name: AIModels.GEMINI_3_FLASH_PREVIEW,
+        name: AIModels.CLAUDE_4_SONNET,
         ...SHARED_IMPLEMENTATION_CONFIG,
     },
     phaseImplementation: {
-        name: AIModels.GEMINI_3_FLASH_PREVIEW,
+        name: AIModels.CLAUDE_4_SONNET,
         ...SHARED_IMPLEMENTATION_CONFIG,
     },
     conversationalResponse: {
-        name: AIModels.GEMINI_2_5_FLASH,
+        name: AIModels.CLAUDE_4_5_HAIKU,
         reasoning_effort: 'low',
         max_tokens: 4000,
         temperature: 0,
-        fallbackModel: AIModels.GEMINI_2_5_PRO,
+        fallbackModel: AIModels.CLAUDE_4_SONNET,
     },
     deepDebugger: {
-        name: AIModels.GEMINI_3_FLASH_PREVIEW,
+        name: AIModels.CLAUDE_4_SONNET,
         reasoning_effort: 'high',
         max_tokens: 8000,
         temperature: 1,
-        fallbackModel: AIModels.GEMINI_2_5_FLASH,
+        fallbackModel: AIModels.CLAUDE_4_5_HAIKU,
     },
     fileRegeneration: {
-        name: AIModels.GEMINI_3_FLASH_PREVIEW,
+        name: AIModels.CLAUDE_4_SONNET,
         reasoning_effort: 'low',
         max_tokens: 32000,
         temperature: 1,
-        fallbackModel: AIModels.GEMINI_2_5_FLASH,
+        fallbackModel: AIModels.CLAUDE_4_5_HAIKU,
     },
     agenticProjectBuilder: {
-        name: AIModels.GEMINI_3_FLASH_PREVIEW,
+        name: AIModels.CLAUDE_4_SONNET,
         reasoning_effort: 'high',
         max_tokens: 8000,
         temperature: 1,
-        fallbackModel: AIModels.GEMINI_2_5_FLASH,
+        fallbackModel: AIModels.CLAUDE_4_5_HAIKU,
     },
 };
 
