@@ -134,15 +134,20 @@ export class CodeGeneratorAgent extends Agent<Env, AgentState> implements AgentI
 
         // Infrastructure setup
         await this.gitInit();
-        
+
+        // Save app to database EARLY so WebSocket ownership checks succeed
+        // This prevents the race condition where frontend connects before app exists in D1
+        await this.saveToDatabase({ early: true, query: initArgs.query });
+
         // Let behavior handle all state initialization (blueprint, projectName, etc.)
         await this.behavior.initialize({
             ...initArgs,
             sandboxSessionId // Pass generated session ID to behavior
         });
-        
-        await this.saveToDatabase();
-        
+
+        // Update the database record with blueprint data now that it's available
+        await this.saveToDatabase({ early: false });
+
         return this.state;
     }
     
@@ -349,30 +354,48 @@ export class CodeGeneratorAgent extends Agent<Env, AgentState> implements AgentI
         return this.behavior.importTemplate(templateName);
     }
     
-    protected async saveToDatabase() {
-        this.logger().info(`Saving agent ${this.getAgentId()} to database`);
-        // Save the app to database (authenticated users only)
+    protected async saveToDatabase(options?: { early?: boolean; query?: string }) {
+        const agentId = this.state.metadata.agentId;
+        const userId = this.state.metadata.userId;
         const appService = new AppService(this.env);
-        await appService.createApp({
-            id: this.state.metadata.agentId,
-            userId: this.state.metadata.userId,
-            sessionToken: null,
-            title: this.state.blueprint.title || this.state.query.substring(0, 100),
-            description: this.state.blueprint.description,
-            originalPrompt: this.state.query,
-            finalPrompt: this.state.query,
-            framework: this.state.blueprint.frameworks.join(','),
-            visibility: 'private',
-            status: 'generating',
+
+        if (options?.early) {
+            // Early save: create app record with minimal data so ownership checks work
+            // This runs BEFORE AI model calls, so blueprint is not yet available
+            this.logger().info(`Early saving agent ${agentId} to database for ownership`);
+            const query = options.query || this.state.query || 'Untitled';
+            await appService.createApp({
+                id: agentId,
+                userId: userId,
+                sessionToken: null,
+                title: query.substring(0, 100),
+                description: '',
+                originalPrompt: query,
+                finalPrompt: query,
+                framework: '',
+                visibility: 'private',
+                status: 'generating',
                 createdAt: new Date(),
-            updatedAt: new Date()
+                updatedAt: new Date()
             });
-        this.logger().info(`App saved successfully to database for agent ${this.state.metadata.agentId}`, { 
-            agentId: this.state.metadata.agentId, 
-            userId: this.state.metadata.userId,
-            visibility: 'private'
-        });
-        this.logger().info(`Agent initialized successfully for agent ${this.state.metadata.agentId}`);
+            this.logger().info(`Early app record saved for agent ${agentId}`);
+        } else {
+            // Late save: update the record with blueprint data now available
+            this.logger().info(`Updating agent ${agentId} with blueprint data`);
+            try {
+                await appService.updateApp(agentId, {
+                    title: this.state.blueprint?.title || this.state.query?.substring(0, 100) || 'Untitled',
+                    description: this.state.blueprint?.description || '',
+                    framework: this.state.blueprint?.frameworks?.join(',') || '',
+                    updatedAt: new Date()
+                });
+                this.logger().info(`App updated with blueprint data for agent ${agentId}`);
+            } catch (error) {
+                // If update fails, log but don't throw - the early record is sufficient
+                this.logger().warn(`Failed to update app with blueprint data: ${error}`);
+            }
+            this.logger().info(`Agent initialized successfully for agent ${agentId}`);
+        }
     }
 
     // ==========================================
