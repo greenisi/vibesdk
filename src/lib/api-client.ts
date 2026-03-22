@@ -1110,6 +1110,7 @@ class ApiClient {
 		email: string;
 		password: string;
 		name?: string;
+		refCode?: string;
 	}): Promise<ApiResponse<RegisterResponseData>> {
 		return this.request<RegisterResponseData>('/api/auth/register', {
 			method: 'POST',

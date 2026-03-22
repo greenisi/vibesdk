@@ -1,3 +1,4 @@
+import { setupAffiliatesRoutes } from './affiliatesRoutes';
 import { setupAuthRoutes } from './authRoutes';
 import { setupAppRoutes } from './appRoutes';
 import { setupUserRoutes } from './userRoutes';
@@ -30,6 +31,9 @@ export function setupRoutes(app: Hono<AppEnv>): void {
 
     // Platform capabilities routes (public)
     setupCapabilitiesRoutes(app);
+
+    // Affiliate tracking routes (public)
+    setupAffiliatesRoutes(app);
 
     // Authentication and user management routes
     setupAuthRoutes(app);

@@ -7,9 +7,9 @@ import { SessionService } from '../../../database/services/SessionService';
 import { UserService } from '../../../database/services/UserService';
 import { ApiKeyService } from '../../../database/services/ApiKeyService';
 import { generateApiKey, sha256Hash } from '../../../utils/cryptoUtils';
-import { 
-    loginSchema, 
-    registerSchema, 
+import {
+    loginSchema,
+    registerSchema,
     oauthProviderSchema
 } from './authSchemas';
 import { SecurityError } from 'shared/types/errors';
@@ -18,7 +18,8 @@ import {
     mapUserResponse,
     setSecureAuthCookies,
 	clearAuthCookies,
-	extractSessionId
+	extractSessionId,
+    parseCookies,
 } from '../../../utils/authUtils';
 import { JWTUtils } from '../../../utils/jwtUtils';
 import { RouteContext } from '../../types/route-context';
@@ -59,6 +60,15 @@ export class AuthController extends BaseController {
             }
 
             const validatedData = registerSchema.parse(bodyResult.data);
+
+            // Resolve referral code: cookie takes priority, body refCode is the fallback
+            const cookieHeader = request.headers.get('Cookie');
+            const cookieRefCode = cookieHeader ? parseCookies(cookieHeader)['referral_code'] : undefined;
+            const refCode = cookieRefCode || validatedData.refCode || undefined;
+
+            if (refCode) {
+                AuthController.logger.info('Referral code captured on registration', { refCode });
+            }
 
             if (env.ALLOWED_EMAIL && validatedData.email !== env.ALLOWED_EMAIL) {
                 return AuthController.createErrorResponse(

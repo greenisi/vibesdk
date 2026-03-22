@@ -245,7 +245,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true);
 
     try {
-      const response = await apiClient.register(data);
+      // Capture ?ref= param from the current URL as a fallback referral code
+      const refCode = new URLSearchParams(window.location.search).get('ref') || undefined;
+      const response = await apiClient.register({ ...data, refCode });
 
       if (response.success && response.data) {
         setUser({ ...response.data.user, isAnonymous: false } as AuthUser);
